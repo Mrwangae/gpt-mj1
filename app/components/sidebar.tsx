@@ -3,14 +3,14 @@ import { useEffect, useRef } from "react";
 import styles from "./home.module.scss";
 
 import { IconButton } from "./button";
+import Image from "next/image";
 import SettingsIcon from "../icons/settings.svg";
 import GithubIcon from "../icons/github.svg";
 import ChatGptIcon from "../icons/chatgpt.svg";
 import AddIcon from "../icons/add.svg";
 import CloseIcon from "../icons/close.svg";
 import MaskIcon from "../icons/mask.svg";
-import GemIcon from "../icons/gem.svg";
-import DragIcon from "../icons/drag.svg";
+import PluginIcon from "../icons/plugin.svg";
 
 import Locale from "../locales";
 
@@ -27,7 +27,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useMobileScreen } from "../utils";
 import dynamic from "next/dynamic";
-import { showConfirm, showToast } from "./ui-lib";
+import { showToast } from "./ui-lib";
 
 const ChatList = dynamic(async () => (await import("./chat-list")).ChatList, {
   loading: () => null,
@@ -38,11 +38,14 @@ function useHotKey() {
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.altKey || e.ctrlKey) {
+      if (e.metaKey || e.altKey || e.ctrlKey) {
+        const n = chatStore.sessions.length;
+        const limit = (x: number) => (x + n) % n;
+        const i = chatStore.currentSessionIndex;
         if (e.key === "ArrowUp") {
-          chatStore.nextSession(-1);
+          chatStore.selectSession(limit(i - 1));
         } else if (e.key === "ArrowDown") {
-          chatStore.nextSession(1);
+          chatStore.selectSession(limit(i + 1));
         }
       }
     };
@@ -109,22 +112,36 @@ export function SideBar(props: { className?: string }) {
   const config = useAppConfig();
 
   useHotKey();
-
+ // <ChatGptIcon />
+ // <div className={styles["sidebar-action"]}>
+ //   <Link to={Path.Settings}>
+ //     <IconButton icon={<SettingsIcon />} shadow />
+ //   </Link>
+ // </div>
+ // <div className={styles["sidebar-action"]}>
+ //   <a href={REPO_URL} target="_blank">
+ //     <IconButton icon={<GithubIcon />} shadow />
+ //   </a>
+ // </div>
   return (
     <div
       className={`${styles.sidebar} ${props.className} ${
         shouldNarrow && styles["narrow-sidebar"]
       }`}
     >
-      <div className={styles["sidebar-header"]} data-tauri-drag-region>
-        <div className={styles["sidebar-title"]} data-tauri-drag-region>
-          ChatGPT-Midjourney
-        </div>
+      <div className={styles["sidebar-header"]}>
+        <div className={styles["sidebar-title"]}> Deep</div>
         <div className={styles["sidebar-sub-title"]}>
-          Your own AI assistant.
+         ChatGPT
         </div>
-        <div className={styles["sidebar-logo"] + " no-dark"}>
-          <ChatGptIcon />
+        <div className={styles["sidebar-logo"] + " no-dark"}> 
+			<Image
+			  className="the_img"
+			  alt="My image"
+			  src="/deep-log.png"
+			  width="200"
+			  height="44"
+			/>
         </div>
       </div>
 
@@ -137,10 +154,10 @@ export function SideBar(props: { className?: string }) {
           shadow
         />
         <IconButton
-          icon={<GemIcon />}
-          text={shouldNarrow ? undefined : "Pro"}
+          icon={<PluginIcon />}
+          text={shouldNarrow ? undefined : Locale.Plugin.Name}
           className={styles["sidebar-bar-button"]}
-          onClick={() => window.open(REPO_URL + "-Pro", "_blank")}
+          onClick={() => showToast(Locale.WIP)}
           shadow
         />
       </div>
@@ -161,23 +178,20 @@ export function SideBar(props: { className?: string }) {
           <div className={styles["sidebar-action"] + " " + styles.mobile}>
             <IconButton
               icon={<CloseIcon />}
-              onClick={async () => {
-                if (await showConfirm(Locale.Home.DeleteChat)) {
+              onClick={() => {
+                if (confirm(Locale.Home.DeleteChat)) {
                   chatStore.deleteSession(chatStore.currentSessionIndex);
                 }
               }}
             />
           </div>
-          <div className={styles["sidebar-action"]}>
-            <Link to={Path.Settings}>
-              <IconButton icon={<SettingsIcon />} shadow />
-            </Link>
-          </div>
-          <div className={styles["sidebar-action"]}>
-            <a href={REPO_URL} target="_blank">
-              <IconButton icon={<GithubIcon />} shadow />
-            </a>
-          </div>
+		  
+		   {/* <div className={styles["sidebar-action"]}>
+		     <Link to={Path.Settings}>
+		      <IconButton icon={<SettingsIcon />} shadow />
+		     </Link>
+		   </div> */}
+
         </div>
         <div>
           <IconButton
@@ -199,9 +213,7 @@ export function SideBar(props: { className?: string }) {
       <div
         className={styles["sidebar-drag"]}
         onMouseDown={(e) => onDragMouseDown(e as any)}
-      >
-        <DragIcon />
-      </div>
+      ></div>
     </div>
   );
 }

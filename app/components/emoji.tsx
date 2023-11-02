@@ -6,12 +6,14 @@ import EmojiPicker, {
 
 import { ModelType } from "../store";
 
+import Image from "next/image";
 import BotIcon from "../icons/bot.svg";
 import BlackBotIcon from "../icons/black-bot.svg";
 
 export function getEmojiUrl(unified: string, style: EmojiStyle) {
   return `https://cdn.staticfile.org/emoji-datasource-apple/14.0.0/img/${style}/64/${unified}.png`;
 }
+console.log(123654)
 
 export function AvatarPicker(props: {
   onEmojiClick: (emojiId: string) => void;
@@ -35,12 +37,20 @@ export function Avatar(props: { model?: ModelType; avatar?: string }) {
         {props.model?.startsWith("gpt-4") ? (
           <BlackBotIcon className="user-avatar" />
         ) : (
-          <BotIcon className="user-avatar" />
+          // <BotIcon className="user-avatar" />
+		<Image
+		  className="bor_a"
+		  alt="My image"
+		  src="/deep_logo.png"
+		  width="21"
+		  height="21"
+		/>
         )}
       </div>
     );
   }
 
+  
   return (
     <div className="user-avatar">
       {props.avatar && <EmojiAvatar avatar={props.avatar} />}
