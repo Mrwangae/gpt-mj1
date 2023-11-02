@@ -1070,7 +1070,7 @@ function _Chat() {
                         }
                         if (payload.url) {
 							console.log(123456)
-                            accessStore.updateOpenAiUrl(payload.url);
+                            // accessStore.updateOpenAiUrl(payload.url);
                         }
                     });
                 }
