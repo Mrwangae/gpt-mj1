@@ -64,8 +64,8 @@ export const useAccessStore = create<AccessControlStore>()(
           !!get().token || !!get().accessCode || !get().enabledAccessControl()
         );
       },
-      fetch() {
-        if (fetchState > 0 || getClientConfig()?.buildMode === "export") return;
+     fetch() {
+        if (fetchState > 0) return;
         fetchState = 1;
         fetch("/api/config", {
           method: "post",
@@ -76,13 +76,30 @@ export const useAccessStore = create<AccessControlStore>()(
         })
           .then((res) => res.json())
           .then((res: DangerConfig) => {
-            console.log("[Config] got config from server", res);
+			  const token = localStorage.getItem("token"); // 获取 token
+			  console.log(!token , res);
+			  if (!token ) {
+				 console.log(token, res);
+			    // 如果没有 token，并且当前路由不是登录页，则跳转到登录页
+			    // Router.push("/login");
+				location.href =location.origin+'/login'
+				return
+			  }
+			console.log(111)
+            console.log(location.host+'/login', res);
+			console.log("[Config] got config from server", res);
             set(() => ({ ...res }));
 
             if (!res.enableGPT4) {
-              DEFAULT_MODELS.forEach(
-                (m: any) => (m.available = !m.name.startsWith("gpt-4")),
-              );
+              ALL_MODELS.forEach((model) => {
+                if (model.name.startsWith("gpt-4")) {
+                  (model as any).available = false;
+                }
+              });
+            }
+
+            if ((res as any).botHello) {
+              BOT_HELLO.content = (res as any).botHello;
             }
           })
           .catch(() => {
