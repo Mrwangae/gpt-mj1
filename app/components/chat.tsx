@@ -1069,6 +1069,7 @@ function _Chat() {
                             accessStore.updateToken(payload.key);
                         }
                         if (payload.url) {
+							console.log(123456)
                             accessStore.updateOpenAiUrl(payload.url);
                         }
                     });
